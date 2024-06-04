@@ -1,4 +1,5 @@
 ## Title: M+ Planner
 ## Author: John Tiehand
 
-Core.lua
+config.lua
+init.lua
