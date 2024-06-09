@@ -50,7 +50,7 @@ function core:init(event, name)
     if (name ~= core.Config.addonName) then return end
 
     local cmd1 = "/mpp"
-    local welcomeStr = string.format("%s's ready! Invite your teammates and type /mpp", core.Config.addonTitle)
+    local welcomeStr = string.format("%s's ready! Invite your teammates and type /mpp . to start", core.Config.addonTitle)
 
     SLASH_MPlusPlanner1 = cmd1
     SlashCmdList.MPlusPlanner = HandleSlashCommands
