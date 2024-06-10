@@ -5,7 +5,6 @@ core.Config.addonName = "MPlusPlanner"
 core.Config.addonTitle = "M+ Planner"
 --
 
-
 local Config = core.Config
 local UIFrame
 
@@ -25,6 +24,44 @@ local function ScrollFrame_OnMouseWheel(self, delta)
     end
 
     self:SetVerticalScroll(newValue)
+end
+
+local function Tab_OnClick(self)
+    PanelTemplates_SetTab(self:GetParent(), self:GetID())
+
+    local scrollChild = UIFrame.ScrollFrame:GetScrollChild()
+    if (scrollChild) then
+        scrollChild:Hide()
+    end
+    UIFrame.ScrollFrame:SetScrollChild(self.content)
+    self.content:Show()
+end
+
+local function SetTabs(frame, numTabs, width, height, ...) -- Create tabs
+    frame.numTabs = numTabs
+    local tabs = {}
+    local frameName = frame:GetName()
+    local firstTabXOffset, firstTabYOffset, tabXOffset, tabYOffset = 5, 7, 3, 0
+
+    for i=1, numTabs do
+        local tab = CreateFrame("Button", frameName.."Tab"..i, frame, "CharacterFrameTabTemplate")
+        tab:SetID(i)
+        tab:SetText(select(i, ...))
+        tab:SetScript("OnClick", Tab_OnClick)
+        tab.content = CreateFrame("Frame", nil, UIFrame.ScrollFrame)
+        tab.content:SetSize(width, height)
+        tab.content:Hide()
+        table.insert(tabs, tab.content)
+
+        if (i == 1) then
+            tab:SetPoint("TOPLEFT", UIFrame, "BOTTOMLEFT", firstTabXOffset, firstTabYOffset)
+        else
+            tab:SetPoint("TOPLEFT", _G[frameName.."Tab"..(i - 1)], "TOPRIGHT", tabXOffset, tabYOffset)
+        end
+    end
+
+    Tab_OnClick(_G[frameName.."Tab1"]) -- first tab is default tab
+    return unpack(tabs)
 end
 
 function Config:CreateMenu()
@@ -49,16 +86,13 @@ function Config:CreateMenu()
     UIFrame.ScrollFrame:SetPoint("BOTTOM", MPlusPlannerFrameDialogBG, "BOTTOM", scrollFrameBottomXOffset, scrollFrameBottomYOffset)
     UIFrame.ScrollFrame:SetClipsChildren(true)
 
-    local child = CreateFrame("Frame", nil, UIFrame.ScrollFrame)
-    child:SetSize(UIFrameWidth, UIFrameHeight)
-    UIFrame.ScrollFrame:SetScrollChild(child)
-
     local scrollbarTopXOffset, scrollbarTopYOffset, scrollbarBottomXOffset, scrollbarBottomYOffset = -12, -18, -7, 18
     UIFrame.ScrollFrame.ScrollBar:ClearAllPoints()
     UIFrame.ScrollFrame.ScrollBar:SetPoint("TOPLEFT", UIFrame.ScrollFrame, "TOPRIGHT", scrollbarTopXOffset, scrollbarTopYOffset)
     UIFrame.ScrollFrame.ScrollBar:SetPoint("BOTTOMRIGHT", UIFrame.ScrollFrame, "BOTTOMRIGHT", scrollbarBottomXOffset, scrollbarBottomYOffset)
-
     UIFrame.ScrollFrame:SetScript("OnMouseWheel", ScrollFrame_OnMouseWheel)
+
+    local plannerTab, settingsTab = SetTabs(UIFrame, 2, UIFrameWidth, UIFrameHeight, "Planner", "Settings")
     
     -- Make UI Frame movable
     UIFrame:SetMovable(true)
